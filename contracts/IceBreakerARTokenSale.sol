@@ -31,7 +31,6 @@ contract IceBreakerARTokenSale is Pausable {
   mapping(address => ExternalSupporter) public externalSupportersMap; // Mapping with external supporters
   IceBreakerARToken public token; // ERC20 Token contract address
   address public vaultWallet; // Wallet address to which ETH and Company Reserve Tokens get forwarded
-  address public airdropWallet; // Wallet address to which Unsold Tokens get forwarded
   address public kycWallet; // Wallet address for the KYC server
   uint256 public tokensSold; // How many tokens have been sold
   uint256 public tokensReserved; // How many tokens have been reserved
@@ -44,12 +43,6 @@ contract IceBreakerARTokenSale is Pausable {
   uint256 public constant TOKEN_SALE_CAP = 212500 * ONE_THOUSAND * 10 ** 18; // Maximum amount of tokens that can be sold by this contract
   uint256 public constant TOTAL_TOKENS_SUPPLY = 300 * ONE_MILLION * 10 ** 18; // Total supply that will be minted
   uint256 public constant MIN_ETHER = 0.1 ether; // Minimum ETH Contribution allowed during the crowd sale
-
-  /* Minimum PreSale Contributions in Ether */
-  uint256 public constant PRE_SALE_MIN_ETHER = 1 ether; // Minimum to get 10% Bonus Tokens
-  uint256 public constant PRE_SALE_15_BONUS_MIN = 60 ether; // Minimum to get 15% Bonus Tokens
-  uint256 public constant PRE_SALE_20_BONUS_MIN = 300 ether; // Minimum to get 20% Bonus Tokens
-  uint256 public constant PRE_SALE_30_BONUS_MIN = 1200 ether; // Minimum to get 30% Bonus Tokens
 
   /* Rate */
   uint256 public tokenBaseRate; // Base rate
@@ -124,7 +117,6 @@ contract IceBreakerARTokenSale is Pausable {
   /**
    * Constructor
    * @param _vaultWallet Vault address
-   * @param _airdropWallet Airdrop wallet address
    * @param _kycWallet KYC address
    * @param _tokenBaseRate Token Base rate (Tokens/ETH)
    * @param _referrerBonusRate Referrer Bonus rate (2 decimals, ex 250 for 2.5%)
@@ -132,7 +124,6 @@ contract IceBreakerARTokenSale is Pausable {
    */
   function IceBreakerARTokenSale(
     address _vaultWallet,
-    address _airdropWallet,
     address _kycWallet,
     uint256 _tokenBaseRate,
     uint256 _referrerBonusRate,
@@ -141,14 +132,12 @@ contract IceBreakerARTokenSale is Pausable {
   public
   {
     require(_vaultWallet != address(0));
-    require(_airdropWallet != address(0));
     require(_kycWallet != address(0));
     require(_tokenBaseRate > 0);
     require(_referrerBonusRate > 0);
     require(_maxTxGasPrice > 0);
 
     vaultWallet = _vaultWallet;
-    airdropWallet = _airdropWallet;
     kycWallet = _kycWallet;
     tokenBaseRate = _tokenBaseRate;
     referrerBonusRate = _referrerBonusRate;
@@ -425,9 +414,9 @@ contract IceBreakerARTokenSale is Pausable {
     // mark sale as finished
     currentState = TokenSaleState.Finished;
 
-    // send the unsold tokens to the airdrop wallet
+    // send the unsold tokens to the vault wallet
     uint256 unsoldTokens = TOKEN_SALE_CAP.sub(tokensSold);
-    token.mint(airdropWallet, unsoldTokens);
+    token.mint(vaultWallet, unsoldTokens);
 
     // send the company reserve tokens to the vault wallet
     uint256 notForSaleTokens = TOTAL_TOKENS_SUPPLY.sub(TOKEN_SALE_CAP);

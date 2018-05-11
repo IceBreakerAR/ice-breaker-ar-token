@@ -11,7 +11,6 @@ async function run() {
 
   const WALLET_OWNER = accounts[0];
   const WALLET_VAULT = accounts[1];
-  const WALLET_AIRDROP = accounts[2];
   const WALLET_KYC = accounts[3];
 
   const WALLET_INVESTOR_1 = accounts[4];
